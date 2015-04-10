@@ -1,0 +1,33 @@
+---
+- name: Me
+  user:
+    name: "{{user_name}}"
+    groups: admin
+  sudo: yes
+
+- name: Git dir
+  file:
+    state: directory
+    path: "{{git_dir}}"
+
+- name: Bash Git Prompt
+  git:
+    repo: https://github.com/magicmonty/bash-git-prompt.git
+    dest: "{{git_dir}}/bash-git-prompt"
+  sudo: yes
+  sudo_user: "{{user_name}}"
+
+- name: Bash profile
+  copy:
+    src: bash_profile
+    dest: "{{home_dir}}/.bash_profile"
+  sudo: yes
+  sudo_user: "{{user_name}}"
+
+- name: Install agent-save for tmux
+  copy:
+    src: agent-save
+    dest: ~/.ssh/agent-save
+    mode: "0700"
+  sudo: yes
+  sudo_user: "{{user_name}}"

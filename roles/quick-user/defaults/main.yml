@@ -1,0 +1,3 @@
+---
+home_dir: /home/{{user_name}}
+git_dir: "{{home_dir}}/git"

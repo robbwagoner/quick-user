@@ -1,0 +1,10 @@
+Host *github.com
+ User git
+ IdentityFile %d/.ssh/robbwagoner-github-heartbleed_rsa.pub
+
+Host *
+ User ubuntu
+ IdentitiesOnly yes
+ IdentityFile %d/.ssh/deploy.pub
+
+#Host *.us-west-2.compute.amazonaws.com
