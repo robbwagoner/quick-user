@@ -1,0 +1,7 @@
+---
+
+- name: Install agent-save for tmux
+  copy:
+    src: agent-save
+    dest: ~/.ssh/agent-save
+    mode: "0700"

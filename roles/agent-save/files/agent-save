@@ -1,0 +1,41 @@
+#!/bin/bash
+#set -ex
+command=$1
+
+case $command in
+
+  ( agent-update )
+    echo "Updating .ssh/agent" >>$HOME/.ssh/agent-save.log
+    SSHVARS="SSH_CLIENT SSH_TTY SSH_AUTH_SOCK SSH_CONNECTION DISPLAY"
+    for var in ${SSHVARS} ; do
+      echo "export $var=\"$(eval echo '$'$var)\""
+    done 1>$HOME/.ssh/agent
+    ;;
+
+  ( * )
+    # SSH Agent persistence between tmux sessions
+    case $TERM in
+
+      ( screen )
+        # just logged in and not yet running tmux
+        if ! [[ "$TMUX" ]] ; then
+            echo "New login" >$HOME/.ssh/agent-save.log
+            $HOME/.ssh/agent-save agent-update
+        fi
+        # tmux is running
+        if [[ "$TMUX" ]] && [ -f $HOME/.ssh/agent ] ; then
+          echo "Evaluating .ssh/agent" >>$HOME/.ssh/agent-save.log
+          source $HOME/.ssh/agent
+          export PROMPT_COMMAND="source $HOME/.ssh/agent"
+          echo "PROMPT_COMMAND=$PROMPT_COMMAND" >>$HOME/.ssh/agent-save.log
+        fi
+        ;;
+
+      ( xterm )
+        $HOME/.ssh/agent-save agent-update
+        ;;
+
+    esac
+    ;;
+
+esac

@@ -1,0 +1,19 @@
+---
+# Create a user for a local bastion|ansible host
+#
+# 
+
+- name: Create the user
+  hosts: localhost
+  connection: local
+  user: ubuntu
+
+  vars:
+    git_dir: /home/{{quick_user}}/git
+    
+  tasks:
+    - name: Bash Git Prompt
+      git:
+        repo: git@github.com:magicmonty/bash-git-prompt.git
+        accept_host_keys: yes
+        dest: "{{git_dir}}/bash-git-prompt"
