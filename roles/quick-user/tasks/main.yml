@@ -9,7 +9,18 @@
   file:
     state: directory
     path: "{{git_dir}}"
+  sudo: yes
+  sudo_user: "{{user_name}}"
 
+- name: SSH dir
+  file:
+    state: directory
+    path: "{{home_dir}}/.ssh"
+    mode: "0700"
+  sudo: yes
+  sudo_user: "{{user_name}}"
+
+- name: Bash Git Prompt
 - name: Bash Git Prompt
   git:
     repo: https://github.com/magicmonty/bash-git-prompt.git
@@ -31,3 +42,9 @@
     mode: "0700"
   sudo: yes
   sudo_user: "{{user_name}}"
+
+- name: Github Public key
+  copy:
+    src: robbwagoner-github-heartbleed_rsa.pub
+    dest: "{{home_dir}}/.ssh/robbwagoner-github-heartbleed_rsa.pub"
+    mode: "0600"
