@@ -21,7 +21,6 @@
   sudo_user: "{{user_name}}"
 
 - name: Bash Git Prompt
-- name: Bash Git Prompt
   git:
     repo: https://github.com/magicmonty/bash-git-prompt.git
     dest: "{{git_dir}}/bash-git-prompt"
@@ -48,3 +47,6 @@
     src: robbwagoner-github-heartbleed_rsa.pub
     dest: "{{home_dir}}/.ssh/robbwagoner-github-heartbleed_rsa.pub"
     mode: "0600"
+  sudo: yes
+  sudo_user: "{{user_name}}"
+
