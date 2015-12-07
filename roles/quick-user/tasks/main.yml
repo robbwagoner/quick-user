@@ -1,52 +1,47 @@
 ---
 - name: Me
-  user:
-    name: "{{user_name}}"
-    groups: admin
+  user: user="{{user_name}}" groups=admin
   sudo: yes
 
-- name: Git dir
-  file:
-    state: directory
-    path: "{{git_dir}}"
-  sudo: yes
+- name: Directory for local Git repos
+  file: state=directory path={{git_dir}}
   sudo_user: "{{user_name}}"
-
-- name: SSH dir
-  file:
-    state: directory
-    path: "{{home_dir}}/.ssh"
-    mode: "0700"
   sudo: yes
-  sudo_user: "{{user_name}}"
 
 - name: Bash Git Prompt
-  git:
-    repo: https://github.com/magicmonty/bash-git-prompt.git
-    dest: "{{git_dir}}/bash-git-prompt"
-  sudo: yes
+  git: repo=https://github.com/magicmonty/bash-git-prompt.git dest={{git_dir}}/bash-git-prompt
   sudo_user: "{{user_name}}"
+  sudo: yes
 
-- name: Bash profile
-  copy:
-    src: bash_profile
-    dest: "{{home_dir}}/.bash_profile"
-  sudo: yes
+- name: SSH dir
+  file: state=directory path={{home_dir}}/.ssh mode="0700"
   sudo_user: "{{user_name}}"
+  sudo: yes
 
 - name: Install agent-save for tmux
-  copy:
-    src: agent-save
-    dest: ~/.ssh/agent-save
-    mode: "0700"
-  sudo: yes
+  copy: src=agent-save dest={{home_dir}}/agent-save  mode="0700"
   sudo_user: "{{user_name}}"
+  sudo: yes
 
 - name: Github Public key
-  copy:
-    src: robbwagoner-github-heartbleed_rsa.pub
-    dest: "{{home_dir}}/.ssh/robbwagoner-github-heartbleed_rsa.pub"
-    mode: "0600"
-  sudo: yes
+  copy: dest={{ssh_public_key_file}} content="{{ssh_public_key}}" mode="0600"
   sudo_user: "{{user_name}}"
+  sudo: yes
+
+- name: Do these things at login
+  lineinfile: dest={{homdir}}/.bash_profile regexp='^{{item.regexp | default(item.line)}}' line='{{item.line}}'
+  with_items:
+    - line: 'if ! [[ $TMUX ]] ; then tmux new-session -A -D -s $USER ; fi'
+    - line: 'source $HOME/.ssh/agent-save'
+    - line: 'source {{git_dir}}/bash-git-prompt/gitprompt.sh'
+  sudo_user: "{{user_name}}"
+  sudo: yes
+
+- name: SSH Config settings for Github
+  lineinfile: dest={{ssh_dir}}/.config regexp='{{item.regexp | default(item.line)}}' line='{{item.line}}'
+  with_items:
+    - line: 'Host *github.com'
+    - line: ' User git'
+    - line: ' IdentityFile {{ssh_public_key_file}}'
+
 
