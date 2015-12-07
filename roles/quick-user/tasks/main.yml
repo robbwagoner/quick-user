@@ -13,13 +13,13 @@
   sudo_user: "{{user_name}}"
   sudo: yes
 
-- name: SSH dir
+- name: User SSH directory
   file: state=directory path={{home_dir}}/.ssh mode="0700"
   sudo_user: "{{user_name}}"
   sudo: yes
 
 - name: Install agent-save for tmux
-  copy: src=agent-save dest={{home_dir}}/agent-save  mode="0700"
+  copy: src=agent-save dest={{ssh_dir}}/agent-save  mode="0700"
   sudo_user: "{{user_name}}"
   sudo: yes
 
@@ -28,8 +28,16 @@
   sudo_user: "{{user_name}}"
   sudo: yes
 
+- name: Create .bash_profile if it doesn't exist 
+  file: path={{item}} state=touch
+  with_items:
+    - "{{home_dir}}/.bash_profile"
+    - "{{ssh_dir}}/config"
+  sudo_user: "{{user_name}}"
+  sudo: yes
+
 - name: Do these things at login
-  lineinfile: dest={{homdir}}/.bash_profile regexp='^{{item.regexp | default(item.line)}}' line='{{item.line}}'
+  lineinfile: dest={{home_dir}}/.bash_profile line='{{item.line}}'
   with_items:
     - line: 'if ! [[ $TMUX ]] ; then tmux new-session -A -D -s $USER ; fi'
     - line: 'source $HOME/.ssh/agent-save'
@@ -38,10 +46,13 @@
   sudo: yes
 
 - name: SSH Config settings for Github
-  lineinfile: dest={{ssh_dir}}/.config regexp='{{item.regexp | default(item.line)}}' line='{{item.line}}'
+  lineinfile: dest={{ssh_dir}}/config line='{{item.line}}' insertbefore="{{item.insertbefore | default(omit)}}" insertafter="{{item.insertafter | default(omit)}}"
   with_items:
     - line: 'Host *github.com'
+      insertbefore: BOF
     - line: ' User git'
+      insertafter: '^Host *github.com'
     - line: ' IdentityFile {{ssh_public_key_file}}'
+      insertafter: '^ User git'
 
 
