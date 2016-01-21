@@ -16,7 +16,7 @@ case $command in
     # SSH Agent persistence between tmux sessions
     case $TERM in
 
-      ( screen )
+      ( screen* )
         # just logged in and not yet running tmux
         if ! [[ "$TMUX" ]] ; then
             echo "New login" >$HOME/.ssh/agent-save.log
